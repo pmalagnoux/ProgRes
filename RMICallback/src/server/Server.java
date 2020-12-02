@@ -1,8 +1,7 @@
 package server;
 
-import java.net.MalformedURLException;
+
 import java.rmi.Naming;
-import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.server.UnicastRemoteObject;
@@ -12,12 +11,10 @@ import client.ChatClient;
 
 
 public class Server extends UnicastRemoteObject implements Chat{
-	//ChatClient Clients;
-	//private int nbMessageEnv = 0;
 	private static final long serialVersionUID = 1L;
 	private ArrayList<String> listMessage = new ArrayList<String>();
 	ArrayList<ChatClient> Clients = new ArrayList<ChatClient>();
-	ArrayList<String> pseudoClients = new ArrayList<String>();
+	
 	
 	
 	protected Server() throws RemoteException {
@@ -29,13 +26,13 @@ public class Server extends UnicastRemoteObject implements Chat{
 	public synchronized void send(ChatClient client, String pseudo, String message) throws RemoteException {
 		// TODO Auto-generated method stub
 		this.listMessage.add(pseudo + ": " + message);
-		for (int i = 0; i<this.Clients.size(); i++) {
-			if(!(this.Clients.get(i).equals(client))) {
+		for (int i = 0; i<this.Clients.size(); i++) { 
+			if(!(this.Clients.get(i).equals(client))) {//On envoie sauf à l'emetteur
 				try {
 					this.Clients.get(i).send(pseudo + ": " + message);
 				}catch(RemoteException e) {
 					System.out.println("Problème de l'envoie du message");
-					this.Clients.remove(i);
+					this.Clients.remove(i);//On retire l'élément problèmatique de la liste
 				}
 			}
 		}
@@ -63,11 +60,12 @@ public class Server extends UnicastRemoteObject implements Chat{
 		// TODO Auto-generated method stub
 		
 		Clients.add(CB);
-		for(int i = 0;i<this.getNbMessage();i++) {
+		for(int i = 0;i<this.getNbMessage();i++) {//Envoi de l'historique des messages
 			try {
 				this.Clients.get(this.Clients.size()-1).send(this.getMessage(i));
 			}catch(RemoteException e) {
 				System.out.println("Problème de l'envoie du message");
+				this.Clients.remove(this.Clients.size()-1);
 			}
 		}
 		for (int i = 0; i<this.Clients.size(); i++) 
@@ -75,7 +73,7 @@ public class Server extends UnicastRemoteObject implements Chat{
 				this.Clients.get(i).send(pseudo + " s'est connecté !!");
 			}catch(RemoteException e) {
 				System.out.println("Problème de l'envoie du message");
-				this.Clients.remove(i);
+				this.Clients.remove(i);//On retire l'élément problèmatique de la liste
 			}
 			
 		this.listMessage.add(pseudo + " s'est connecté !!");
@@ -85,15 +83,15 @@ public class Server extends UnicastRemoteObject implements Chat{
 	public synchronized void deconnexion(ChatClient client, String pseudo) throws RemoteException {
 		// TODO Auto-generated method stub
 		this.listMessage.add(pseudo + " s'est déconnecté !!");
-		for (int i = 0; i<this.Clients.size(); i++) 
+		for (int i = 0; i<this.Clients.size(); i++) {
 			try {
 				this.Clients.get(i).send(pseudo + " s'est déconnecté !!");
 			} catch(RemoteException e) {
 				System.out.println("Problème de l'envoie du message");
-				this.Clients.remove(i);
+				this.Clients.remove(i);//On retire l'élément problèmatique de la liste
 			}
-	
-		this.Clients.remove(client);
+		}
+		this.Clients.remove(client);//On retire le client voulant se déconnecter de la liste
 		
 	}
 	
