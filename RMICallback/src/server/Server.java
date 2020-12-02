@@ -12,11 +12,11 @@ import client.ChatClient;
 
 
 public class Server extends UnicastRemoteObject implements Chat{
-	ChatClient Clients;
-	private int nbMessageEnv = 0;
+	//ChatClient Clients;
+	//private int nbMessageEnv = 0;
 	private static final long serialVersionUID = 1L;
 	private ArrayList<String> listMessage = new ArrayList<String>();
-
+	ArrayList<ChatClient> Clients = new ArrayList<ChatClient>();
 	
 	
 	
@@ -31,7 +31,8 @@ public class Server extends UnicastRemoteObject implements Chat{
 		this.listMessage.add(pseudo + ": " + message);
 		//System.out.println(pseudo + ": " + message);// a deleate
 		//System.out.println(this.getNbMessage());
-		this.Clients.send(pseudo + ": " + message);
+		for (int i = 0; i<this.Clients.size(); i++)
+			this.Clients.get(i).send(pseudo + ": " + message);
 	}
 
 	public String getMessage(int pos) throws RemoteException {
@@ -55,7 +56,7 @@ public class Server extends UnicastRemoteObject implements Chat{
 		// TODO Auto-generated method stub
 		this.listMessage.add(pseudo + " s'est connecté !!");
 		try {
-			Clients = (ChatClient)Naming.lookup("//localhost/RmiClient");
+			Clients.add((ChatClient)Naming.lookup("//localhost/RmiClient"));
 		} catch (MalformedURLException | RemoteException | NotBoundException e) {
 			// TODO Auto-generated catch block
 			System.out.println("oie");
@@ -81,10 +82,7 @@ public class Server extends UnicastRemoteObject implements Chat{
         System.out.println("Serveur callback prêt!");
         
         while(true) {
-        	try {
-        		
-        	
-        			
+        	try {	
         		}
         	
         	
